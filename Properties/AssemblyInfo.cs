@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // 制御されます。アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更します。
 [assembly: AssemblyTitle("WorldQuakeViewer")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("世界の地震情報を表示します。")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Project-S")]
 [assembly: AssemblyProduct("WorldQuakeViewer")]
-[assembly: AssemblyCopyright("Copyright ©  2022")]
+[assembly: AssemblyCopyright("Copyright © 2022 Project-S@31415")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

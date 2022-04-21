@@ -125,23 +125,22 @@ namespace WorldQuakeViewer
                 int LocX;
                 if (Long >= 0)
                 {
-                    LocX = (int)(Long + 180) * -5 + 250;
+                    LocX = (int)(Long + 180) * -5 + 200;
                 }
                 else
                 {
-                    LocX = (int)(180 - Long * -1) * -5 + 250;
+                    LocX = (int)(180 - Long * -1) * -5 + 200;
                 }
                 int LocY;
                 if (Lat >= 0)
                 {
-                    LocY = (int)(Lat + 90) * -5 + 350;
+                    LocY = (int)(Lat + 90) * -5 + 400;
                 }
                 else
                 {
-                    LocY = (int)(90 - Lat * -1) * -5 + 350;
+                    LocY = (int)(90 - Lat * -1) * -5 + 400;
                 }
                 MainImg.Location = new Point(LocX, LocY);
-                MainImg.Location = new Point(0, 0);
                 Console.WriteLine("緯度" + Lat);
                 Console.WriteLine("経度" + Long);
                 Console.WriteLine("X" + LocX);
