@@ -134,11 +134,11 @@ namespace WorldQuakeViewer
                 int LocY;
                 if (Lat >= 0)
                 {
-                    LocY = (int)(Lat + 90) * -5 + 400;
+                    LocY = (int)(90 - Lat) * -5 + 300;
                 }
                 else
                 {
-                    LocY = (int)(90 - Lat * -1) * -5 + 400;
+                    LocY = (int)(Lat + 90) * -5 + 300;
                 }
                 MainImg.Location = new Point(LocX, LocY);
                 Console.WriteLine("緯度" + Lat);
