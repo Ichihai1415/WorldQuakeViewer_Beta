@@ -45,7 +45,7 @@
             // JsonTimer
             // 
             this.JsonTimer.Enabled = true;
-            this.JsonTimer.Interval = 30000;
+            this.JsonTimer.Interval = 300;
             this.JsonTimer.Tick += new System.EventHandler(this.JsonTimer_Tick);
             // 
             // USGS0
@@ -73,10 +73,10 @@
             // 
             this.USGS3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(60)))));
             this.USGS3.Font = new System.Drawing.Font("Koruri Regular", 11F);
-            this.USGS3.Location = new System.Drawing.Point(184, 96);
+            this.USGS3.Location = new System.Drawing.Point(183, 96);
             this.USGS3.Margin = new System.Windows.Forms.Padding(0);
             this.USGS3.Name = "USGS3";
-            this.USGS3.Size = new System.Drawing.Size(431, 25);
+            this.USGS3.Size = new System.Drawing.Size(398, 25);
             this.USGS3.TabIndex = 3;
             // 
             // USGS2
@@ -92,7 +92,7 @@
             // 
             // ShingenImg
             // 
-            this.ShingenImg.BackColor = System.Drawing.Color.Black;
+            this.ShingenImg.BackColor = System.Drawing.Color.White;
             this.ShingenImg.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ShingenImg.ImageLocation = "";
             this.ShingenImg.Location = new System.Drawing.Point(241, 351);
@@ -105,7 +105,6 @@
             // MainImg
             // 
             this.MainImg.BackColor = System.Drawing.Color.Black;
-            this.MainImg.BackgroundImage = global::WorldQuakeViewer.Properties.Resources.Worldmap;
             this.MainImg.Location = new System.Drawing.Point(533, 625);
             this.MainImg.Margin = new System.Windows.Forms.Padding(0);
             this.MainImg.Name = "MainImg";
@@ -115,7 +114,7 @@
             // 
             // ShingenLabel1
             // 
-            this.ShingenLabel1.BackColor = System.Drawing.Color.Black;
+            this.ShingenLabel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.ShingenLabel1.Font = new System.Drawing.Font("MS UI Gothic", 50F);
             this.ShingenLabel1.ForeColor = System.Drawing.Color.Red;
             this.ShingenLabel1.Location = new System.Drawing.Point(0, 125);

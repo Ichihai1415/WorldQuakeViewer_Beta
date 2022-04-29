@@ -46,5 +46,17 @@ namespace WorldQuakeViewer.Properties {
                 this["TweetedText"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public long LatestTime {
+            get {
+                return ((long)(this["LatestTime"]));
+            }
+            set {
+                this["LatestTime"] = value;
+            }
+        }
     }
 }

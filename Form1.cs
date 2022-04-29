@@ -21,7 +21,6 @@ using USGSFERegionsClass2;
 using CoreTweet;
 
 namespace WorldQuakeViewer
-
 {
     public partial class MainForm : Form
     {
@@ -29,9 +28,9 @@ namespace WorldQuakeViewer
         {
             InitializeComponent();
         }
-
         private void JsonTimer_Tick(object sender, EventArgs e)
         {
+            JsonTimer.Interval = 30000;
             //try
             {
                 Console.WriteLine(DateTime.Now.ToString("HH:mm:ss.fff") + "　動作開始");
@@ -40,7 +39,6 @@ namespace WorldQuakeViewer
                 {
                     Encoding = Encoding.UTF8
                 };
-
                 string USGSQuakeJson_ = "[" + WC.DownloadString("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson") + "]";
                 Console.WriteLine(DateTime.Now.ToString("HH:mm:ss.fff") + "　地震情報ダウンロード終了");
                 double StartTime = Convert.ToDouble(DateTime.Now.ToString("yyyyMMddHHmmss.ffff"));
@@ -138,25 +136,24 @@ namespace WorldQuakeViewer
                 }
                 else
                 {
-                    LocY = (int)(Lat + 90) * -5 + 300;
+                    LocY = (int)(Lat + 90) * -5 + 150;
                 }
                 MainImg.Location = new Point(LocX, LocY);
-                Console.WriteLine("緯度" + Lat);
-                Console.WriteLine("経度" + Long);
-                Console.WriteLine("X" + LocX);
-                Console.WriteLine("Y" + LocY);
-                Console.WriteLine(MainImg.Location);
+                Bitmap bitmap = new Bitmap(Resources.Worldmap);
+                Graphics graphics = Graphics.FromImage(bitmap);
+                graphics.DrawImage(Resources.Point, new Rectangle(LocX * - 1 + 185, LocY * - 1 + 285, 30,30));
+                MainImg.Image = bitmap;
+                graphics.Dispose();
                 string MMI = "";
                 if (USGSQuakeJson[0].Features[0].Properties.Mmi != null)
                 {
-                    MMI = $"({Convert.ToString(USGSQuakeJson[0].Features[0].Properties.Mmi)})";
+                    MMI = $"({(Convert.ToString(USGSQuakeJson[0].Features[0].Properties.Mmi) + ".0").Replace(".1.0", ".1").Replace(".2.0", ".2").Replace(".3.0", ".3").Replace(".4.0", ".4").Replace(".5.0", ".5").Replace(".6.0", ".6").Replace(".7.0", ".7").Replace(".8.0", ".8").Replace(".9.0", ".9")})";
                 }
 
                 USGS0.Text = $"USGS地震情報　　{Time}";
                 USGS1.Text = $"{Shingen1}\n{Shingen2}\n{Depth}\n{Mag}";
                 USGS2.Text = $"{MaxInt}";
-                USGS3.Text = $"改正メルカリ震度階級:  　　　　　{MMI.Replace("(","")}";
-
+                USGS3.Text = $"改正メルカリ震度階級:　　　　　  {MMI.Replace("(", "").Replace(")", "")}";
                 if (USGSQuakeJson[0].Features[0].Properties.Mag >= 6.0)
                 {
                     USGS0.ForeColor = Color.Yellow;
@@ -165,10 +162,17 @@ namespace WorldQuakeViewer
                     USGS3.ForeColor = Color.Yellow;
                     try
                     {
-                        string TweetText = $"USGS地震情報【{Mag.Replace(":", "")}】{Time.Replace("※","(")})\n{Shingen1}{Shingen2}\n{Depth}\n改正メルカリ震度階級:{MaxInt}{MMI}";
+                        string TweetText = $"USGS地震情報【{(Mag.Replace(":", "") + ".0").Replace(".1.0", ".1").Replace(".2.0", ".2").Replace(".3.0", ".3").Replace(".4.0", ".4").Replace(".5.0", ".5").Replace(".6.0", ".6").Replace(".7.0", ".7").Replace(".8.0", ".8").Replace(".9.0", ".9")}】{Time.Replace("※","(")})\n{Shingen1}{Shingen2}\n緯度:{Lat} 経度:{Long}　{Depth}\n改正メルカリ震度階級:{MaxInt}{MMI}";
+                        Console.WriteLine(TweetText);
                         DateTime DataTime2 = Convert.ToDateTime(Convert.ToString(DataTime).Remove(19, 7));
                         DateTime NowTime = DateTime.Now;
                         TimeSpan ReMainTime = NowTime - DataTime2;
+                        Settings.Default.Reload();
+                        if (Settings.Default.LatestTime == (long)USGSQuakeJson[0].Features[0].Properties.Time)
+                        {
+                            TweetText.Replace("USGS地震情報", "USGS地震情報(更新)");
+                        }
+                        Settings.Default.LatestTime = (long)USGSQuakeJson[0].Features[0].Properties.Time;
                         if (Settings.Default.Tweet && TweetText != Settings.Default.TweetedText && ReMainTime <= TimeSpan.FromHours(12))
                         {
                             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
@@ -178,6 +182,7 @@ namespace WorldQuakeViewer
                             Status status = tokens.Statuses.Update(new { status = TweetText });
                         }
                         Settings.Default.TweetedText = TweetText;
+                        Settings.Default.Save();
                     }
                     catch
                     {
@@ -196,29 +201,9 @@ namespace WorldQuakeViewer
                     USGS1.ForeColor = Color.White;
                     USGS2.ForeColor = Color.White;
                     USGS3.ForeColor = Color.White;
+                    string DebugTweetText = $"USGS地震情報【{(Mag.Replace(":", "") + ".0").Replace(".1.0", ".1").Replace(".2.0", ".2").Replace(".3.0", ".3").Replace(".4.0", ".4").Replace(".5.0", ".5").Replace(".6.0", ".6").Replace(".7.0", ".7").Replace(".8.0", ".8").Replace(".9.0", ".9")}】{Time.Replace("※", "(")})\n{Shingen1}{Shingen2}\n緯度:{Lat} 経度:{Long}　{Depth}\n改正メルカリ震度階級:{MaxInt}{MMI}";
+                    Console.WriteLine(DebugTweetText);
                 }
-                
-                /*震源印画像描画うまくできないので保留
-                Bitmap ShingenPoint = new Bitmap(Resources.Point);
-                ShingenPoint.MakeTransparent();
-                ShingenImg.Image = ShingenPoint;
-                ShingenImg.BackgroundImage = ShingenPoint;
-                MainImg.Controls.Add(ShingenImg);
-                ShingenImg.BackColor = Color.Transparent;
-                ShingenImg.Size = new Size(40, 40);
-                Console.WriteLine(ShingenImg.Size);
-                Console.WriteLine(ShingenImg.Image);
-                Console.WriteLine(ShingenImg.Location);
-
-                //ShingenLabel1.Size = new Size(400, 400);
-                //ShingenLabel2.Size = new Size(400, 400);
-                ShingenLabel1.Controls.Add(MainImg);
-                ShingenLabel2.Controls.Add(MainImg);
-                ShingenLabel1.BackColor = Color.Transparent;
-                ShingenLabel2.BackColor = Color.Transparent;
-
-                Console.WriteLine(MainImg.Image);
-                */
             }/*
             catch (Exception ex)
             {
