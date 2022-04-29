@@ -104,6 +104,9 @@ namespace WorldQuakeViewer
                 string Mag = USGSQuakeJson[0].Features[0].Properties.MagType + ":" + USGSQuakeJson[0].Features[0].Properties.Mag;
                 double Lat = USGSQuakeJson[0].Features[0].Geometry.Coordinates[1];
                 double Long = USGSQuakeJson[0].Features[0].Geometry.Coordinates[0];
+                //デバッグ用
+                //Lat = -52.5;
+                //Long = -2.4;
                 string Depth = $"深さ:{USGSQuakeJson[0].Features[0].Geometry.Coordinates[2]}km";
                 string USGSFERegion_ = WC.DownloadString($"https://earthquake.usgs.gov/ws/geoserve/regions.json?latitude={Lat}&longitude={Long}&type=fe");
                 Console.WriteLine(DateTime.Now.ToString("HH:mm:ss.fff") + "　震源情報ダウンロード終了");
@@ -136,7 +139,7 @@ namespace WorldQuakeViewer
                 }
                 else
                 {
-                    LocY = (int)(Lat + 90) * -5 + 150;
+                    LocY = (int)(- Lat + 90) * -5 + 300;
                 }
                 MainImg.Location = new Point(LocX, LocY);
                 Bitmap bitmap = new Bitmap(Resources.Worldmap);
