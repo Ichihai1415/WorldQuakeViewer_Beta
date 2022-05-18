@@ -58,5 +58,17 @@ namespace WorldQuakeViewer.Properties {
                 this["LatestTime"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double LatestPoint {
+            get {
+                return ((double)(this["LatestPoint"]));
+            }
+            set {
+                this["LatestPoint"] = value;
+            }
+        }
     }
 }
