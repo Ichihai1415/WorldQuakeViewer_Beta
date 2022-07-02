@@ -1,0 +1,2 @@
+System.NullReferenceException: オブジェクト参照がオブジェクト インスタンスに設定されていません。
+   場所 WorldQuakeViewer.MainForm.JsonTimer_Tick(Object sender, EventArgs e) 場所 C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\Form1.cs:行 137

@@ -1,0 +1,16 @@
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\bin\Release\WorldQuakeViewer.exe.config
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\bin\Release\WorldQuakeViewer.exe
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\bin\Release\WorldQuakeViewer.pdb
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\bin\Release\CoreTweet.dll
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\bin\Release\Newtonsoft.Json.dll
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\bin\Release\CoreTweet.xml
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\bin\Release\Newtonsoft.Json.xml
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\obj\Release\WorldQuakeViewer.csproj.AssemblyReference.cache
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\obj\Release\WorldQuakeViewer.csproj.SuggestedBindingRedirects.cache
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\obj\Release\WorldQuakeViewer.MainForm.resources
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\obj\Release\WorldQuakeViewer.Properties.Resources.resources
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\obj\Release\WorldQuakeViewer.csproj.GenerateResource.cache
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\obj\Release\WorldQuakeViewer.csproj.CoreCompileInputs.cache
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\obj\Release\WorldQuakeViewer.csproj.CopyComplete
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\obj\Release\WorldQuakeViewer.exe
+C:\Users\proje\source\repos\WorldQuakeViewer\WorldQuakeViewer\obj\Release\WorldQuakeViewer.pdb
