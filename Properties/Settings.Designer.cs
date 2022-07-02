@@ -12,7 +12,7 @@ namespace WorldQuakeViewer.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -26,48 +26,48 @@ namespace WorldQuakeViewer.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Tweet {
+        public bool IsTweet {
             get {
-                return ((bool)(this["Tweet"]));
+                return ((bool)(this["IsTweet"]));
             }
             set {
-                this["Tweet"] = value;
+                this["IsTweet"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsRemoteTalk {
+            get {
+                return ((bool)(this["IsRemoteTalk"]));
+            }
+            set {
+                this["IsRemoteTalk"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string TweetedText {
+        public string NowVersion {
             get {
-                return ((string)(this["TweetedText"]));
+                return ((string)(this["NowVersion"]));
             }
             set {
-                this["TweetedText"] = value;
+                this["NowVersion"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public long LatestTime {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string NewVersion {
             get {
-                return ((long)(this["LatestTime"]));
+                return ((string)(this["NewVersion"]));
             }
             set {
-                this["LatestTime"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double LatestPoint {
-            get {
-                return ((double)(this["LatestPoint"]));
-            }
-            set {
-                this["LatestPoint"] = value;
+                this["NewVersion"] = value;
             }
         }
     }

@@ -8,6 +8,10 @@ namespace USGSQuakeClass
         public double Mag { get; set; }
         public string Place { get; set; }
         public object Time { get; set; }
+        public object Updated { get; set; }
+        public string Url { get; set; }
+        public int Tsunami { get; set; }
+        public string Alert { get; set; }
         public double? Mmi { get; set; }
         public string MagType { get; set; }
     }
@@ -19,6 +23,7 @@ namespace USGSQuakeClass
     {
         public Properties Properties { get; set; }
         public Geometry Geometry { get; set; }
+        public string Id { get; set; }
     }
     public class USGSQuake
     {
@@ -38,7 +43,7 @@ namespace USGSFERegionsClass
 
     public class Properties
     {
-        public int Number { get; set; }
+        public int? Number { get; set; }
         public string Name { get; set; }
     }
 
