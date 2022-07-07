@@ -2,7 +2,9 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -22,6 +24,7 @@ namespace WorldQuakeViewer
         }
         private void JsonTimer_Tick(object sender, EventArgs e)
         {
+            Settings.Default.Reload();
             JsonTimer.Interval = 30000;
             try
             {
@@ -32,16 +35,46 @@ namespace WorldQuakeViewer
                     Encoding = Encoding.UTF8
                 };
                 string USGSQuakeJson_ = "[" + WC.DownloadString("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson") + "]";
-
-                Console.WriteLine(DateTime.Now.ToString("HH:mm:ss.fff") + "　地震情報ダウンロード終了");
+                string Latestchecktime = Convert.ToString(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
+                Console.WriteLine(DateTime.Now.ToString("HH:mm:ss.fff") + "　ダウンロード終了");
                 double StartTime = Convert.ToDouble(DateTime.Now.ToString("yyyyMMddHHmmss.ffff"));
                 List<USGSQuake> USGSQuakeJson = JsonConvert.DeserializeObject<List<USGSQuake>>(USGSQuakeJson_);
-                Console.WriteLine(DateTime.Now.ToString("HH:mm:ss.fff") + "　地震情報デシアライズ終了");
-                double LatestPoint = USGSQuakeJson[0].Features[0].Geometry.Coordinates[0] + USGSQuakeJson[0].Features[0].Geometry.Coordinates[1] + USGSQuakeJson[0].Features[0].Geometry.Coordinates[2];
-                if (LatestPoint != Settings.Default.LatestPoint)
+                Console.WriteLine(DateTime.Now.ToString("HH:mm:ss.fff") + "　デシアライズ終了");
+                DateTimeOffset Update = DateTimeOffset.FromUnixTimeMilliseconds((long)USGSQuakeJson[0].Features[0].Properties.Updated).ToLocalTime();
+                Console.WriteLine(Update);
+                string UpdateTime = "";
+                if (Update.Hour < 10)
                 {
-                    Settings.Default.LatestPoint = LatestPoint;
-                    string MaxInt;
+                    UpdateTime = Convert.ToString(Update).Remove(18, 7);
+                }
+                else
+                {
+                    UpdateTime = Convert.ToString(Update).Remove(19, 7);
+                }
+                DateTimeOffset DataTimeNew = DateTimeOffset.FromUnixTimeMilliseconds((long)USGSQuakeJson[0].Features[0].Properties.Time).ToLocalTime();
+                string TimeNew = "";
+                if (DataTimeNew.Hour < 10)
+                {
+                    TimeNew = Convert.ToString(DataTimeNew).Remove(18, 7);
+                }
+                else
+                {
+                    TimeNew = Convert.ToString(DataTimeNew).Remove(19, 7);
+                }
+                DateTimeOffset DataTimeOld = DateTimeOffset.FromUnixTimeMilliseconds((long)USGSQuakeJson[0].Features[1].Properties.Time).ToLocalTime();
+                string TimeOld = "";
+                if (DataTimeOld.Hour < 10)
+                {
+                    TimeOld = Convert.ToString(DataTimeOld).Remove(18, 7);
+                }
+                else
+                {
+                    TimeOld = Convert.ToString(DataTimeOld).Remove(19, 7);
+                }
+                if (USGSQuakeJson[0].Features[0].Id != LatestId)
+                {
+                    LatestId = USGSQuakeJson[0].Features[0].Id;
+                    string MaxInt = "-";
                     if (USGSQuakeJson[0].Features[0].Properties.Mmi < 1.5)
                     {
                         MaxInt = "I";
@@ -90,37 +123,96 @@ namespace WorldQuakeViewer
                     {
                         MaxInt = "XII";
                     }
-                    else
+                    DateTimeOffset DataTimeOff = DateTimeOffset.FromUnixTimeMilliseconds((long)USGSQuakeJson[0].Features[0].Properties.Time).ToLocalTime();
+                    string Time = Convert.ToString(DataTimeOff).Replace("+0", "※UTC +0").Replace("+1", "※UTC +1").Replace("-0", "※UTC -0").Replace("+1", "※UTC -1");
+                    string Mag = $"{USGSQuakeJson[0].Features[0].Properties.Mag}";
+                    if (Mag.Length == 1)
                     {
-                        MaxInt = "-";
+                        Mag += ".0";
                     }
-                    DateTimeOffset DataTime = DateTimeOffset.FromUnixTimeMilliseconds((long)USGSQuakeJson[0].Features[0].Properties.Time).ToLocalTime();
-                    string Time = Convert.ToString(DataTime).Replace("+0", "※UTC +0").Replace("+1", "※UTC +1").Replace("-0", "※UTC -0").Replace("+1", "※UTC -1");
-                    string Mag = USGSQuakeJson[0].Features[0].Properties.MagType + ":" + USGSQuakeJson[0].Features[0].Properties.Mag;
+                    LatestURL = USGSQuakeJson[0].Features[0].Properties.Url;
+                    string MagType = USGSQuakeJson[0].Features[0].Properties.MagType;
                     double Lat = USGSQuakeJson[0].Features[0].Geometry.Coordinates[1];
                     double Long = USGSQuakeJson[0].Features[0].Geometry.Coordinates[0];
-                    string LatSt = $"N{Lat}".Replace("N-", "S");
-                    string LongSt = $"E{Long}".Replace("E-", "W");
-
-                    //デバッグ用
-                    //Lat = -52.5;
-                    //Long = -2.4;
+                    string Arart = "アラート:-";
+                    if (USGSQuakeJson[0].Features[0].Properties.Alert != null)
+                    {
+                        Arart = Arart.Replace("-", USGSQuakeJson[0].Features[0].Properties.Alert.Replace("green", "緑").Replace("yellow", "黄").Replace("red", "赤"));
+                    }
+                    string LatStFull = $"N{Lat}".Replace("N-", "S");
+                    string LongStFull = $"E{Long}".Replace("E-", "W");
+                    TimeSpan LatMath = TimeSpan.FromHours(Lat);
+                    TimeSpan LongMath = TimeSpan.FromHours(Long);
+                    string LatStShort = $"{(int)Lat}ﾟ{LatMath.Minutes}'N";
+                    string LongStShort = $"{(int)Long}ﾟ{LongMath.Minutes}'E";
+                    if (Lat < 0)
+                    {
+                        LatStShort = $"{(int)Lat * -1}ﾟ{LatMath.Minutes * -1}'S";
+                    }
+                    if (Long < 0)
+                    {
+                        LongStShort = $"{(int)Long * -1}ﾟ{LongMath.Minutes * -1}'W";
+                    }
+                    string LatStLong = $"{(int)Lat}ﾟ{LatMath.Minutes}'{LatMath.Seconds}\"N";
+                    string LongStLong = $"{(int)Long}ﾟ{LongMath.Minutes}'{LongMath.Seconds}\"E";
+                    if (Lat < 0)
+                    {
+                        LatStLong = $"{(int)Lat * -1}ﾟ{LatMath.Minutes * -1}'{LatMath.Seconds * -1}\"S";
+                    }
+                    if (Long < 0)
+                    {
+                        LongStLong = $"{(int)Long * -1}ﾟ{LongMath.Minutes * -1}'{LongMath.Seconds * -1}\"W";
+                    }
+                    string LatStLongJP = $"北緯{(int)Lat}度{LatMath.Minutes}分{LatMath.Seconds}秒";
+                    string LongStLongJP = $"東経{(int)Long}度{LongMath.Minutes}分{LongMath.Seconds}秒";
+                    if (Lat < 0)
+                    {
+                        LatStLongJP = $"南緯{(int)Lat * -1}度{LatMath.Minutes * -1}分{LatMath.Seconds * -1}秒";
+                    }
+                    if (Long < 0)
+                    {
+                        LongStLongJP = $"西経{(int)Long * -1}度{LongMath.Minutes * -1}分{LongMath.Seconds * -1}秒";
+                    }
                     string Depth = $"深さ:{USGSQuakeJson[0].Features[0].Geometry.Coordinates[2]}km";
                     string USGSFERegion_ = WC.DownloadString($"https://earthquake.usgs.gov/ws/geoserve/regions.json?latitude={Lat}&longitude={Long}&type=fe");
                     Console.WriteLine(DateTime.Now.ToString("HH:mm:ss.fff") + "　震源情報ダウンロード終了");
                     string Shingen1 = "震源: - - - - - ";
+                    string Shingen1_ = "null";
+                    string Num1 = "null";
+                    string Num2 = "null";
+                    string JPNameNotFoundLogText = "";
                     try
                     {
                         USGSFERegions USGSFERegion = JsonConvert.DeserializeObject<USGSFERegions>(USGSFERegion_);
-                        Shingen1 = "震源:" + HypoName[USGSFERegion.Fe.Features[0].Properties.Number];
+                        Shingen1 = "震源:" + HypoName[(int)USGSFERegion.Fe.Features[0].Properties.Number];
+                        Num1 = $"{USGSFERegion.Fe.Features[0].Properties.Number}";
                     }
                     catch
                     {
-                        USGSFERegions2 USGSFERegion2 = JsonConvert.DeserializeObject<USGSFERegions2>(USGSFERegion_);
-                        Shingen1 = "震源:" + USGSFERegion2.Fe.Features[0].Properties.Name;
+                        try
+                        {
+                            USGSFERegions USGSFERegion = JsonConvert.DeserializeObject<USGSFERegions>(USGSFERegion_);
+                            Shingen1 = "震源:" + HypoName[(int)USGSFERegion.Fe.Features[1].Properties.Number];
+                            Shingen1_ = HypoName[(int)USGSFERegion.Fe.Features[1].Properties.Number];
+                            Num2 = $"{USGSFERegion.Fe.Features[1].Properties.Number}";
+                        }
+                        catch
+                        {
+                            USGSFERegions2 USGSFERegion2 = JsonConvert.DeserializeObject<USGSFERegions2>(USGSFERegion_);
+                            Shingen1 = "震源:" + USGSFERegion2.Fe.Features[0].Properties.Name;
+                        }
+                        try
+                        {
+                            JPNameNotFoundLogText = $"{File.ReadAllText($"Log\\JPNameNotFound.txt")}\n--------------------------------------------------\n";
+                        }
+                        catch
+                        {
+
+                        }
+                        JPNameNotFoundLogText += $"Time={DateTime.Now:MM/dd HH:mm},Latitude={Lat},Longitude={Long},Number1={Num1},Number2={Num2},Name1={Shingen1.Replace("震源:", "").Replace(" - - - - - ", "null").Replace(Shingen1_, "null")},Name2={Shingen1_}";
+                        File.WriteAllText($"Log\\JPNameNotFound.txt", JPNameNotFoundLogText);
                     }
                     string Shingen2 = $"({USGSQuakeJson[0].Features[0].Properties.Place})";
-
                     int LocX;
                     if (Long >= 0)
                     {
@@ -144,73 +236,125 @@ namespace WorldQuakeViewer
                     Graphics graphics = Graphics.FromImage(MainBitmap);
                     graphics.DrawImage(Resources.Point, new Rectangle(LocX * -1 + 185, LocY * -1 + 285, 30, 30));
                     MainImg.Image = MainBitmap;
+                    MainBitmap.Save("Latest.png", ImageFormat.Png);
                     graphics.Dispose();
 
-                    string MMI = "";
+                    string MMI = "-";
                     if (USGSQuakeJson[0].Features[0].Properties.Mmi != null)
                     {
                         MMI = $"({Convert.ToString(USGSQuakeJson[0].Features[0].Properties.Mmi)})";
                     }
-
-                    USGS0.Text = $"USGS地震情報　　{Time}";
-                    USGS1.Text = $"{Shingen1}\n{Shingen2}\n{Depth} {LatSt} {LongSt}\n{Mag}　　　改正メルカリ震度階級:";
-                    USGS2.Text = $"{MMI.Replace("(", "").Replace(")", "")}({MaxInt})".Replace("(-)", "-");
-                    NetworkError.Text = "";
-                    string LogText = $"USGS地震情報【{(Mag.Replace(":", "") + ".0").Replace(".1.0", ".1").Replace(".2.0", ".2").Replace(".3.0", ".3").Replace(".4.0", ".4").Replace(".5.0", ".5").Replace(".6.0", ".6").Replace(".7.0", ".7").Replace(".8.0", ".8").Replace(".9.0", ".9")}】{Time.Replace("※", "(")})\n{Shingen1}{Shingen2}\n{LatSt},{LongSt}　{Depth}\n改正メルカリ震度階級:{MaxInt}{MMI}";
+                    USGS0.Text = $"USGS地震情報　　　　　{Time}";
+                    USGS1.Text = $"{Shingen1}\n{Shingen2}\n{LatStShort} {LongStShort}\n{Depth}";
+                    USGS2.Text = $"{MagType}";
+                    USGS3.Text = $"{Mag}";
+                    USGS4.Text = $"改正メルカリ\n　　震度階級:";
+                    USGS5.Text = $"{MMI.Replace("(", "").Replace(")", "")}";
+                    USGS6.Text = $"{UpdateTime}発表\n{Latestchecktime}更新\n地図データ:NationalEarth";
+                    USGS6.Location = new Point(400 - USGS6.Width, USGS6.Location.Y);
+                    string LogText_ = $"USGS地震情報【{MagType}{Mag}】{Time.Replace("※", "(")})\n{Shingen1}{Shingen2}\n{LatStLong},{LongStLong}　{Depth}\n改正メルカリ震度階級:{MaxInt}{MMI.Replace("-", "")}\n詳細:{LatestURL}";
+                    string RemoteTalkText = $"USGS地震情報。マグニチュード{Mag}、震源、{Shingen1.Replace(" ", "、").Replace("/", "、").Replace("震源:", "")}、{LatStLongJP}、{LongStLongJP}、深さ{Depth.Replace("深さ:", "")}。{$"改正メルカリ震度階級{MMI.Replace("(", "").Replace(")", "")}".Replace("改正メルカリ震度階級-", "")}、{Arart/*.Replace("アラート:-","")*/}\n情報:{LatestURL}";
+                    if (USGSQuakeJson[0].Features[0].Properties.Tsunami == 1)
+                    {
+                        LogText_ += "\n津波発生の可能性あり。最新情報を確認してください。https://www.tsunami.gov/";
+                        RemoteTalkText += "津波発生の可能性あり。";
+                    }
+                    if (TimeOld.Remove(15, 3) == TimeNew.Remove(15, 3))
+                    {
+                        LogText_.Replace("USGS地震情報", "USGS地震情報(更新)");
+                        RemoteTalkText.Replace("USGS地震情報", "USGS地震情報、更新");
+                    }
                     try
                     {
-                        LogText = File.ReadAllText($"Log\\M4.5+\\{DateTime.Now:yyyyMMdd}.txt") + "\n--------------------------------------------------\n" + LogText;
-                        File.WriteAllText($"Log\\M4.5+\\{DateTime.Now:yyyy/MM/dd}.txt", LogText);
+                        string LogText = File.ReadAllText($"Log\\M4.5+\\{DateTime.Now:yyyyMMdd}.txt") + "\n--------------------------------------------------\n" + LogText_;
+                        File.WriteAllText($"Log\\M4.5+\\{DateTime.Now:yyyyMMdd}.txt", LogText);
                     }
                     catch
                     {
-                        File.WriteAllText($"Log\\M4.5+\\{DateTime.Now:yyyyMMdd}.txt", LogText);
+                        try
+                        {
+                            File.WriteAllText($"Log\\M4.5+\\{DateTime.Now:yyyyMMdd}.txt", LogText_);
+                        }
+                        catch
+                        {
+
+                        }
                     }
                     if (USGSQuakeJson[0].Features[0].Properties.Mag >= 6.0)
                     {
                         USGS0.ForeColor = Color.Yellow;
                         USGS1.ForeColor = Color.Yellow;
                         USGS2.ForeColor = Color.Yellow;
+                        USGS3.ForeColor = Color.Yellow;
+                        USGS4.ForeColor = Color.Yellow;
+                        USGS5.ForeColor = Color.Yellow;
 
                         try
                         {
-                            string TweetText = $"USGS地震情報【{(Mag.Replace(":", "") + ".0").Replace(".1.0", ".1").Replace(".2.0", ".2").Replace(".3.0", ".3").Replace(".4.0", ".4").Replace(".5.0", ".5").Replace(".6.0", ".6").Replace(".7.0", ".7").Replace(".8.0", ".8").Replace(".9.0", ".9")}】{Time.Replace("※", "(")})\n{Shingen1}{Shingen2}\n{LatSt},{LongSt}　{Depth}\n改正メルカリ震度階級:{MaxInt}{MMI}";
-                            Console.WriteLine(TweetText);
-                            DateTime DataTime2 = Convert.ToDateTime(Convert.ToString(DataTime).Remove(19, 7));
+                            DateTime DataTime2 = Convert.ToDateTime(Convert.ToString(DataTimeOff).Remove(19, 7));
                             DateTime NowTime = DateTime.Now;
                             TimeSpan ReMainTime = NowTime - DataTime2;
-                            Settings.Default.Reload();
-                            if (Settings.Default.LatestTime == (long)USGSQuakeJson[0].Features[0].Properties.Time)
-                            {
-                                TweetText.Replace("USGS地震情報", "USGS地震情報(更新)");
-                            }
-                            Settings.Default.LatestTime = (long)USGSQuakeJson[0].Features[0].Properties.Time;
-                            if (Settings.Default.Tweet && TweetText != Settings.Default.TweetedText && ReMainTime <= TimeSpan.FromHours(12))
+
+                            if (Settings.Default.IsTweet && ReMainTime <= TimeSpan.FromHours(12))
                             {/*メモリ足りない問題
-                            Rectangle Rectangle = new Rectangle(LocX - 185, LocY - 285, 400, 400);
-                            Bitmap NewBitmap = MainBitmap.Clone(Rectangle, MainBitmap.PixelFormat);
-                            NewBitmap.Save("Latest.png", ImageFormat.Png);
-                            NewBitmap.Dispose();*/
+                                Rectangle Rectangle = new Rectangle(LocX - 185, LocY - 285, 400, 400);
+                                Bitmap NewBitmap = MainBitmap.Clone(Rectangle, MainBitmap.PixelFormat);
+                                NewBitmap.Save("Latest.png", ImageFormat.Png);
+                                NewBitmap.Dispose();*/
                                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
                                 string tokens_json = File.ReadAllText($"Tokens.json");
                                 Tokens_JSON Tokens_jsondata = JsonConvert.DeserializeObject<Tokens_JSON>(tokens_json);
                                 Tokens tokens = Tokens.Create(Tokens_jsondata.ConsumerKey, Tokens_jsondata.ConsumerSecret, Tokens_jsondata.AccessToken, Tokens_jsondata.AccessSecret);
-                                Status status = tokens.Statuses.Update(new { status = TweetText });
-                            }
+                                //リプライ予定
 
-                            Settings.Default.TweetedText = TweetText;
-                            Settings.Default.Save();
+
+                                Status status = tokens.Statuses.Update(new { status = LogText_ });
+                            }
                         }
                         catch
                         {
+
                         }
-                        File.WriteAllText($"Log\\M6.0+\\{DateTime.Now:yyyyMMdd}.txt", LogText);
+                        try
+                        {
+                            string LogText = File.ReadAllText($"Log\\M6.0+\\{DateTime.Now:yyyyMMdd}.txt") + "\n--------------------------------------------------\n" + LogText_;
+                            File.WriteAllText($"Log\\M6.0+\\{DateTime.Now:yyyyMMdd}.txt", LogText);
+                        }
+                        catch
+                        {
+                            try
+                            {
+                                File.WriteAllText($"Log\\M6.0+\\{DateTime.Now:yyyyMMdd}.txt", LogText_);
+                            }
+                            catch
+                            {
+
+                            }
+                        }
                         if (USGSQuakeJson[0].Features[0].Properties.Mag >= 8.0)
                         {
                             USGS0.ForeColor = Color.Red;
                             USGS1.ForeColor = Color.Red;
                             USGS2.ForeColor = Color.Red;
-                            File.WriteAllText($"Log\\M8.0+\\{DateTime.Now:yyyyMMdd}.txt", LogText);
+                            USGS3.ForeColor = Color.Red;
+                            USGS4.ForeColor = Color.Red;
+                            USGS5.ForeColor = Color.Red;
+                            try
+                            {
+                                string LogText = File.ReadAllText($"Log\\M4.5+\\{DateTime.Now:yyyyMMdd}.txt") + "\n--------------------------------------------------\n" + LogText_;
+                                File.WriteAllText($"Log\\M8.0+\\{DateTime.Now:yyyyMMdd}.txt", LogText);
+                            }
+                            catch
+                            {
+                                try
+                                {
+                                    File.WriteAllText($"Log\\M8.0+\\{DateTime.Now:yyyyMMdd}.txt", LogText_);
+                                }
+                                catch
+                                {
+
+                                }
+                            }
                         }
                     }
                     else
@@ -218,7 +362,10 @@ namespace WorldQuakeViewer
                         USGS0.ForeColor = Color.White;
                         USGS1.ForeColor = Color.White;
                         USGS2.ForeColor = Color.White;
-                        string DebugTweetText = $"USGS地震情報【{(Mag.Replace(":", "") + ".0").Replace(".1.0", ".1").Replace(".2.0", ".2").Replace(".3.0", ".3").Replace(".4.0", ".4").Replace(".5.0", ".5").Replace(".6.0", ".6").Replace(".7.0", ".7").Replace(".8.0", ".8").Replace(".9.0", ".9")}】{Time.Replace("※", "(")})\n{Shingen1}{Shingen2}\n{LatSt},{LongSt}　{Depth}\n改正メルカリ震度階級:{MaxInt}{MMI}";
+                        USGS3.ForeColor = Color.White;
+                        USGS4.ForeColor = Color.White;
+                        USGS5.ForeColor = Color.White;
+                        string DebugTweetText = $"USGS地震情報【{(Mag.Replace(":", "") + ".0").Replace(".1.0", ".1").Replace(".2.0", ".2").Replace(".3.0", ".3").Replace(".4.0", ".4").Replace(".5.0", ".5").Replace(".6.0", ".6").Replace(".7.0", ".7").Replace(".8.0", ".8").Replace(".9.0", ".9")}】{Time.Replace("※", "(")})\n{Shingen1}{Shingen2}\n{LatStFull},{LongStFull}　{Depth}\n改正メルカリ震度階級:{MaxInt}{MMI}";
                         Console.WriteLine(DebugTweetText);
                         /*
                         Rectangle Rectangle = new Rectangle(LocX - 185, LocY - 285, 400, 400);
@@ -226,14 +373,60 @@ namespace WorldQuakeViewer
                         NewBitmap.Save("Latest.png", ImageFormat.Png);
                         NewBitmap.Dispose();*/
                     }
+                    if (USGSQuakeJson[0].Features[0].Properties.Alert == null)
+                    {
+                        USGS0.BackColor = Color.Black;
+                        USGS0.ForeColor = Color.White;
+                    }
+                    else if (USGSQuakeJson[0].Features[0].Properties.Alert == "green")
+                    {
+                        USGS0.BackColor = Color.Green;
+                        USGS0.ForeColor = Color.White;
+                    }
+                    else if (USGSQuakeJson[0].Features[0].Properties.Alert == "yellow")
+                    {
+                        USGS0.BackColor = Color.Yellow;
+                        USGS0.ForeColor = Color.Black;
+                    }
+                    else if (USGSQuakeJson[0].Features[0].Properties.Alert == "red")
+                    {
+                        USGS0.BackColor = Color.Red;
+                        USGS0.ForeColor = Color.White;
+                    }
+
+                    if (Settings.Default.IsRemoteTalk)
+                    {
+                        try
+                        {
+                            Process.Start(File.ReadAllText("RemoteTalkPath.txt"), $"/Talk {RemoteTalkText.Replace("アラート:-", "")}");
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            File.WriteAllText("RemoteTalkPath.txt", "");
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+
                 }
+                USGS6.Text = $"{UpdateTime}発表\n{Latestchecktime}更新\n地図データ:NationalEarth";
+                USGS6.Location = new Point(400 - USGS6.Width, USGS6.Location.Y);
+                ErrorText.Text = "";
             }
             catch (WebException)
             {
-                NetworkError.Text = "ネットワークエラー";
+                ErrorText.Text = $"ネットワークエラー\nあと{10 - NetWorkErrorPoint}回で再起動します...";
+                NetWorkErrorPoint++;
+                if (NetWorkErrorPoint == 11)
+                {
+                    Application.Restart();
+                }
             }
             catch (Exception ex)
             {
+                ErrorText.Text = $"エラーが発生しました。次のフォルダがあることを\n確認してください。\n\n　/Log\n　/Log/ErrorLog\n　/Log/M4.5+\n　/Log/M6.0+\n　/Log/M8.0+\n\n分からない場合、エラーログの内容を\n製作者に報告してください。\n場所:Log/ErrorLog/{DateTime.Now:yyyyMMdd}.txt";
                 try
                 {
                     string ErrorText = File.ReadAllText($"Log\\ErrorLog\\{DateTime.Now:yyyyMMdd}.txt") + "\n--------------------------------------------------\n" + ex;
@@ -1004,8 +1197,105 @@ namespace WorldQuakeViewer
 {754,"ニジェール"},
 {755,"ナイジェリア"},
 {756,"イースター島南東方"},
-{757,"ガラパゴス三重会合点"},
-{758,"!震源名リストにありません"}
+{757,"ガラパゴス三重会合点"}
         };
+        public string LatestId = "";
+        public string LatestURL = "";
+        public int NetWorkErrorPoint = 0;
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                Settings.Default.Reload();
+                WebClient WC = new WebClient
+                {
+                    Encoding = Encoding.UTF8
+                };
+                Settings.Default.NowVersion = USGS6.Text.Remove(0, 22);
+                Settings.Default.NewVersion = WC.DownloadString("https://raw.githubusercontent.com/Project-S-31415/WorldQuakeViewer/main/Version.txt").Replace("\n", "");
+                Settings.Default.Save();
+
+                if (Settings.Default.NowVersion != Settings.Default.NewVersion)
+                {
+                    Dialog dialog = new Dialog();
+                    dialog.ShowDialog();
+                    if (dialog.DialogResult == DialogResult.OK)
+                    {
+                        Application.Exit();
+                    }
+                }
+            }
+            catch
+            {
+                throw new Exception("ネットワークに接続できません。");
+            }
+
+        }
+
+        private void RCsetting_Click(object sender, EventArgs e)
+        {
+            SettingsForm Form2 = new SettingsForm();
+            Form2.Show();
+        }
+
+        private void RCusgsmap_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://earthquake.usgs.gov/earthquakes/map/");
+        }
+
+        private void RCusgsthis_Click(object sender, EventArgs e)
+        {
+            Process.Start(LatestURL);
+        }
+
+
+        private void RCreboot_Click(object sender, EventArgs e)
+        {
+            Application.Restart();
+        }
+
+        private void RCexit_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void RCgithub_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/Project-S-31415");
+        }
+
+        private void RCtwitter_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://twitter.com/ProjectS31415_1");
+        }
+
+        private void RCameba_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://projects31415softs.amebaownd.com/");
+        }
+
+        private void RCopenreadme_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                WebClient WC = new WebClient
+                {
+                    Encoding = Encoding.UTF8
+                };
+                File.WriteAllText("REDAME.md", WC.DownloadString("https://raw.githubusercontent.com/Project-S-31415/WorldQuakeViewer/main/README.md"));
+                Process.Start("notepad.exe", "README.md");
+            }
+            catch
+            {
+                try
+                {
+                    Process.Start("notepad.exe", "README.md");
+                }
+                catch
+                {
+                    throw new Exception("README.mdが見つかりません。");
+                }
+            }
+        }
     }
 }
