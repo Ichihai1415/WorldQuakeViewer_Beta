@@ -3,3 +3,5 @@
 ################################################################################
 
 /.vs/WorldQuakeViewer/FileContentIndex
+/WorldQuakeViewer/obj/x64
+/WorldQuakeViewer/obj/Debug
