@@ -1,6 +1,6 @@
 # WorldQuakeViewer
 USGSから世界の地震情報を表示します。
-
+### Koruri Regularフォントをインストールしてください。https://koruri.github.io/
 2022 4/6開発開始
 
 ## 予定
