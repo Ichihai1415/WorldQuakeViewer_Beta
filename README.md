@@ -1,6 +1,7 @@
-# WorldQuakeViewer
+# このソフトはベータ版です。[開発中正式公開版](https://github.com/Project-S-31415/WorldQuakeViewer)
 USGSから世界の地震情報を表示します。
 ### Koruri Regularフォントをインストールしてください。https://koruri.github.io/
+### 起動時に「ネットワークに接続できません」とエラーが出ることがありますが
 2022 4/6開発開始
 
 ## 予定
